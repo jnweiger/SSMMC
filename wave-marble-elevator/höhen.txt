@@ -1,0 +1,16 @@
+0	17.5	00
+30	12.5	3
+60	8	6
+90	4.5	9
+120	2	12
+150	0       15
+
+...
+
+300	0	30
+330	0	33
+
+
+LinearPattern: 
+	Length: (Occurences-1)*36mm
+	Occurences: 4

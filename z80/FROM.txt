@@ -1,0 +1,8 @@
+https://www.youtube.com/watch?v=aHx-XUA6f9g
+
+The Z80 actually only has a 4bit ALU.
+They can afford to feed everything twice through the ALU, as the memory bus is slow.
+
+details 
+-> righto.com/Z80
+

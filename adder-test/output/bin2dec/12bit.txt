@@ -1,0 +1,27 @@
+die 6 bit werden mit leichten hebeln abgetastet, und anwesenheit oder abwesenheit einer kugel schaltet eine Vertikale stange zwischen zwei engen Positionen, z.b. 8mm hin und her (wwenn die Stange 3 mm breit ist)..
+
+Wir haben 10 kärtchen mit den ziffern 0-9 für die einer und 7 kärtchen mit den ziffern 0-6 für die zehner. Die einer sind auf einem drehpunkt weit rechts gelagert, die zehner auf einem drepunkt weit links.
+
+die vertikalen Stangen liegen quer zum Stapel dieser 17 kärtchen.
+die kärtchen haben schlitze, so dass die Stangen kärtchen blockieren 
+oder freigeben können.
+
+genügt das?
+
+
+
+	32  16  8    4   2   1
+	1 0 1 0 1 0  1 0 1 0 1 0
+	-------------------------
+6 0	X   X   X    X     X   X
+5 0	X   X     X    X X     X
+4 0	X     X X      X   X   X
+3 0	  X X   X    X   X     X
+2 0	  X X     X  X     X   X
+1 0	  X   X X      X X     X
+  0	  X   X   X    X   X   X
+
+  
+Alles das muss die einer null zeigen. -hmmm.
+
+Oder machen wir da doch gleich 64 kärtchen draus???

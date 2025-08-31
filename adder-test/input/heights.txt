@@ -1,0 +1,24 @@
+added heights:
+  v-test adder: 40 mm
+  -> top of the rear rails is at 97 mm
+
+  Slides: end of the 2s-slide is 6 mm lower than the right wall mount point.
+  -> need 103 mm there.
+
+  Right wall slide mount point is 53.4 mm above right wall bottom edge
+  -> need 50 mm clearance under the wall.
+  -> need two 8 mm posts of length 64 mm,  (down by 18mm: 46 mm)   with a 2.3 mm bore across 11mm from the upper end, 2mm from the lower end.
+  -> need two 8 mm posts of length 73.3 mm (down by 18mm: 55.3 mm) for the left wall, same bores.
+
+clutch of the ones row is 33 mm above right wall bottom edge
+  -> 65mm above ground.
+
+
+----
+and now 18mm down again!
+
+
+-> The front rail connecters is 20mm above the center of the 6x6 throwers.
+-> The front of the throwers is 2 mm behind of the back of the (old) rail.
+
+

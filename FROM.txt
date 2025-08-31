@@ -1,0 +1,13 @@
+https://www.youtube.com/watch?v=WAap_UHzIbc	Calender, counting up and down.
+https://youtu.be/8BOvLL8ok8I	ActionLab: A Computer That Runs on Marbles
+Machina Arithmetica Dyadica
+  https://www.uni-hannover.de/de/universitaet/profil/leibniz/leibnizausstellung/
+
+5bit lochstreifen:
+ https://www.wpavel.de/zuse/doku/lochstreifen.php
+
+6bit RS-224:
+
+
+See also: ~/oc-fablab/jw/marble-adder/FROM.txt
+See also: ~/cloud.fablab-nuernberg.de/Z1/FROM.txt

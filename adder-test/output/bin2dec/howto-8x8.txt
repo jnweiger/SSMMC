@@ -1,0 +1,43 @@
+we want to represent the numbers from 0 to 63. 
+We arrange them in a square, 8 by 8.
+The lower 3 bits are unary decoded to represent the x-coordinate 0..7
+The upper 3 bits are unary decoded to represent the y-coordinate 0..7
+At the intersection we write the decimal value.
+Thus we can move a rectangular viewing window around on the board that shows the decimal representation of the 8 bit binary number.
+
+How to build a 3bit binary to unary decoder.
+ - It must be able to "read" absence or presence of a 25mm steel marble.
+   Each marble lifts a lever, so that it engages with the drive shaft or not.
+   Thus the levers move forward an exactly defined amount, independant of tolerances that occur when probing the marbles.
+ - a lever network adds up all the amounts... and lifts a tooth by a tiny fraction. This pointer is in one of the 8 positions.
+   staffelwalze? 
+
+Or:
+
+ - It must be able to "read" absence or presence of a 25mm steel marble.
+   Each marble lifts a lever, so that it engages with the drive shaft or not.
+ - the 0bit lever places 1 tooth in the way of a probe wheel
+ - the 1bit lever places 2 teeht, the 2bit lever places 4 teeht
+ - thus a wheel rolling along the entire distance rotates (unevenly) 0..7 teeth.
+
+
+
+First step
+==========
+
+Build an array of six flaps, with end postions 90 deg apart. Spring loaded snapping.
+ - To the side of each flap, we can attach either, or:
+    - round disks with flexile ribbon and push rod (similar to the input device)
+      * printable in one piece, no assembly needed, no slack possible.
+      * somewhat springy due to the flex of the ribbon.
+      * needs space before and after the mounting shaft. May interfere with objects that come near the flaps.
+    - pinion gears and mating rack gear on a push rod
+      * multiple parts, but probably better stiffness and precision possible?.
+      * same space isuse as with the flex ribbon solution, but we can add one more gear to offset the pushrod.
+    - a lever, with a push rod attached to its end
+      * simple, but movement is not linear, not even planar with the neighbours
+      * direction of movment is into the third dimension, does not come near the array of flaps.
+      * maybe the lever is a segment of a gear...
+   The gears/disks/lever come in three sizes, so that the push rodstravel either 1.5 cm, 3 cm or 4.5 cm
+ - problem: due to the differnt diamers of the disks, the rods are not on the same layer.
+ 
