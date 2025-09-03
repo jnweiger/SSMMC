@@ -1,4 +1,60 @@
-Frischers Fitz frischt fische Fitze.
+			jw, Mo 1. Sep 15:29:05 CEST 2025
+output unit:
+We build a binary to unary decoder, and let the marbles roll into an output stack. 
+This is the same binary to unary decode we need for loading jumps into the pc stack.
+
+program rom is 10 bits wide. 6 bits for an embeded data word, 4 bits for an opcode. TODO: Is 16 opcodes sufficient?
+
+
+
+
+
+
+Program counter:
+A stack of marbles. It encodes in unary. Normal operations add one marble to the pc stack, so that the next command
+gets addressed. 
+"Relative forward jumps" can optionally put n extra marbles in the pc stack.
+"Reset PC" drains all marbles from the pc stack.
+A backwards consists of a drain, followed by putting in n marbles.
+
+The command decoder senses the height of the pc stack and selects a microcode punch card (or a microcode conveyor belt) based on the binary code found there.
+
+
+-----
+
+
+All microcodes reset program counter increment to 1.
+All microcodes reset the timer step counter to 0. 
+All microcodes program their done flag to fire after a maximum T=n steps.
+When a microcode done flag was raised, subsequent time steps move the program counter until all increments are done. 
+the program counter advances one memory register, where the next microcode is found.
+
+microcode operations:
+X X X 0 0 1	Multibit Add in Register X. Stops after T=6
+
+
+
+Multiplier
+----
+
+Modeeled after the Leibniz Box with Holes idea.
+It needs 3 things.
+1) A set of three registers A, B, X of 6 bits each. X needs to have safety rails, to dump bits above 6 and set a mechanical 
+   overflow flag, if so.
+2) a register copy mechanism: A into X with left shift (0-5). 
+3) a register bit walk, that performs "an operation" if the relevant bit of Register B is set.
+
+A moveable platform consists of 6 Gates, that can be switched on or off. The gates sit between a 6 bit latch gate on a power rail and register X.
+In T=0, the bits of register A are transfered into open/closed gates of the platform.
+In T=1, the latch gate opens for one ball. Where platform gates are open, a marble rolls from the power rail into 
+register X
+In T=2, the platform moves one bit position to the side.
+In T=3,4 until T=11,12 the same actions are repeated. 
+(the platform should be built as a conveyor belt, that loops back to the beginning, if possible. Otherwise, we need an extra step 13, that bring the platform back)
+
+
+
+----
 
 
 ITA or Baudot-Murray Punch tapes use 5 bits. With a Letter shift and Figure shift code to extend to effectively 64 code points.
@@ -88,16 +144,23 @@ https://www.amazon.de/Muzzler-Premium-Stahlkugeln-Schleudern-Katapult/dp/B01N06G
 https://www.amazon.de/Vancool-Professional-Kunststoff-Slingshots-Plastikperlen/dp/B073XH9R3D
 500 plastic, 10mm diam, cost 14 EUR, ca 0.6gr each
 
+https://www.amazon.de/g8ds-Marken-Schleudermunition-Stahlkugeln-Schleuder-Munition/dp/B07GS91Y3B
+500 steel balls, 12mm, cost 25 EUR
+
+https://www.amazon.de/12-mm-Kohlenstoffstahlkugeln-umweltfreundlich-Maschinenbau-Heimwerker-Kugellager/dp/B0DQCKZQLS
+200 steel balls, 12mm, 1.4kg, cost 12 EUR
+
 https://www.amazon.de/g8ds-Marken-Schleudermunition-Stahlkugeln-Schleuder-Munition/dp/B07GSG2P8Y
 200 steel balls, 16mm, cost 11 EUR.
 
 https://www.amazon.de/g8ds-Marken-Schleudermunition-Stahlkugeln-Schleuder-Munition/dp/B07GSBQWFG
 500 steel balls, 16mm, cost 27 EUR.
 
-https://www.amazon.de/g8ds-Marken-Schleudermunition-Stahlkugeln-Schleuder-Munition/dp/B07GS91Y3B/
-500 steel balls 12.5mm, cost 19 EUR
 
 16mm is affordable. Steel or glass. There is no need for plastic or clay.
+
+12mm steel is probably better: 500 balls 12mm weigh ca 3.5 kg,
+
 
 
 
