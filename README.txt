@@ -1,4 +1,3 @@
-			jw, Mo 1. Sep 15:29:05 CEST 2025
 output unit:
 We build a binary to unary decoder, and let the marbles roll into an output stack. 
 This is the same binary to unary decode we need for loading jumps into the pc stack.
@@ -149,6 +148,17 @@ https://www.amazon.de/g8ds-Marken-Schleudermunition-Stahlkugeln-Schleuder-Muniti
 
 https://www.amazon.de/12-mm-Kohlenstoffstahlkugeln-umweltfreundlich-Maschinenbau-Heimwerker-Kugellager/dp/B0DQCKZQLS
 200 steel balls, 12mm, 1.4kg, cost 12 EUR
+
+https://www.amazon.de/sourcing-map-Lagerkugeln-Chromstahl-Pr%C3%A4zisionskugeln/dp/B0822LMMM6
+50 steel balls, 12mm, Chromstahl G10, 17.30 EUR
+
+https://www.ebay.de/itm/335435976697?var=544846175789
+100 steel balls, 12mm, Edelstahl rostfrei G100, 20 EUR
+
+############################################################################
+https://www.ebay.de/itm/396583747630
+127 stück, 0.95 kg, 12mm, Chromstahl C15, 9 EUR + 5 EUR
+
 
 https://www.amazon.de/g8ds-Marken-Schleudermunition-Stahlkugeln-Schleuder-Munition/dp/B07GSG2P8Y
 200 steel balls, 16mm, cost 11 EUR.
