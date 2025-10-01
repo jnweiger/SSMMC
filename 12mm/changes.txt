@@ -1,0 +1,7 @@
+
+Kurbel antrieb: 
+bei jeder umdrehung ein nocken, der den finishpusher herauszieht.
+wenn eine kugel fällt, wird der finishpusher vom sich hebenden gate zurückgeschoben
+-> falls der finishpusher noch vorne ist, wird in der nächsten Umdrehung (!) ja, wir haben zeit. der stopper gesenkt.
+
+Oder fest 8 Umdrehungen piston, ein Nocken, der den Stopper auf macht.
