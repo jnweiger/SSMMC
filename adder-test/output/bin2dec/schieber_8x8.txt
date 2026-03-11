@@ -1,0 +1,33 @@
+			jw, Wed Mar 11 08:23:23 CET 2026
+
+Hinter Einer, Zweier, Vierer liegen Plättchen zu je 10, 20, 40mm Länge.
+Die Plättchen liegen im Ruhezustand an den Postion 0mm, 12mm, 34mm, d.h. sie haben 2mm Abstand zueinander.
+Die 3 Plättchen liegen jede in einer eigenen Rinne, die durch die Anwesenheit einer Kugel leicht gekippt wird.
+Im gekippten Zustand ragen die Plättchen in den Bereich von Schieber A hinein, und werden von diesem folgendermassen mitgenommen.
+Das gekippte einerplättchen kann an einem ungekippten zweier und vierer plättchen vorbei fahren.
+Das gekippte zweierplättchen kann am ungekippten vierer plättchen vorbei fahren.
+gekippt trifft jedes Plättchen auf das nächste. 
+Der Schieber A bewegt sich immer genau 76mm durch eine halbe Kurbelumdrehung. in der anderen halben, wieder zurück.
+Am Ende des Schineensystems befindet sich Schieber B an Position 76 mm, d.h. er liegt 2mm hinter Plättcen vier. 
+Schieber B wird um 10mm bewegt, wenn nur Plättchen eins gekippt ist.
+um 20mm, wenn nur 2, 
+um 30mm, wenn 1 und zwei, usw. bis 70mm, wenn alle drei gekippt sind.
+Schieber A besitzt einen Rückholkamm, welcher jeweils einen Rückholhaken von Schieber B, PLättchen eins, zwei, und vier soweit bewegt, dass die Teile in ihre 
+Ruhepoition geholt werden. 
+Die Führungen für die Plättchen und Schieber B haben leichte Verrastungen in jeweils 10mm oder 12mm Schritten, so dass die Teile sich durch 
+Erschütterung nicht bewegen.
+Durch die Kurbelumdrehung muss es leicht möglich sein vier solche Verrastungen gleichzeitig zu überdrücken.
+
+Damit ist ein unärer Addierer gebaut, der aus den 3 Bits die 8 Schiebepositionen 0, 10, 20, 30, 40, 50, 60, 70 mm abbildet.
+
+Für die Bits acht, sechzehn, zweiunddreissig, wird ganz genauso ein zweiter Addierer aufgebaut.
+Schieber B des ersten Addieres, verschiebt eine Zahlen Trommel auf einer Gleitachse. 
+Schieber B des zweiten Addierer hat eine Zahnstange, die über zewi Kegelräder die Gleitachse dreht. 
+
+Die Schienen und Schieber sind etwas schrägt zu den Bits angeordnet, so das der abstand von bit zu Kipp-Rinne immer gleich bleibt.
+Auf der Trommel sind die Zahlen von 0 bis 63 so angeordnet, dass eine der Zahlen genau unter dem Ausgabefensterchen liegt.
+
+Verbesserung: Schieber A und B bekommen zusätzlichen Leerhub von 10mm, Dann kann im Ausgabefenster ein leeres Feld gezeigt werden, 
+wenn die Kurbel in Reset-Position ist. 
+
+
