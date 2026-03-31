@@ -23,3 +23,4 @@ for i in (10, 20, 30, 40, 50, 60):
     print(i+j)
     print("\t%s" % format(i, '06b'))
     print("\t%s       -> %s" % (format(j, '06b'), format(i+j, '06b')))
+    

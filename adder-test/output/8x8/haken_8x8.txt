@@ -1,0 +1,13 @@
+am einer, zweier, vierer (und achter) je ein Hebel, der im Ruhezustnd unten ist, und eine je 1,2,4(,8) Einheiten breite Kante hat.
+An der Kante fährt per Antriebsschieber eine Rolle entlang, die seitlich federt.
+sind die Hebel oben, wird die Rolle beim vorbeifahren um 3mm ausgelenkt. 
+Neben dem Antriebsschieber liegt der Ausgabeschieber, der eine Verzahnung hat. Gleiche Zahn-Zahn Abstände, wie die obigen Einheiten.
+Wenn die Rolle des Antriebschiebers ausgelenkt ist, dann greift ein Haken in die Verzahnung, und nimmt den so viele einheiten mit, wie die Kante dahinter lang war.
+Am Ende des Weges löst der antriebsschieber das Fallgitter aus, die Kugeln verschwinden, alle Hebel fallen in den Ruhezustand.
+Auf dem Rückweg des Antriebsschiebers zieht ein Mitnehmerhaken den ausgabeschieber wieder auf Startposition. 
+Am Ende des Rückwegs zieht ein anderer Mitnehmerhaken das Fallgitter wieder unter die Kugelschächte. 
+
+
+Wie lang muss eine Einheit min. sein, um die Auslenkung von 3mm zu bewirken, wie gross muss die Rolle min. sein?
+-> Danach wird der Gesamthub des Antriebsschiebers festgelegt: es sind 15 Einheiten + Gitterweg + 2 mm Leerweg
+
