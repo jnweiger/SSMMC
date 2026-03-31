@@ -1,0 +1,114 @@
+# Install into:
+#  ~/.local/share/FreeCAD/v1-2/Macro/move-along-path.FCMacro
+#
+# (C) 2026-03-31, juergenweigert68@gmail.com, distribute under GPL or ask
+#
+# Perplexity:
+# Yes. A FreeCAD macro can absolutely show a GUI slider and use it to drive the motion live,
+# and Qt/PySide slider dialogs are a normal pattern for FreeCAD macros.
+# Below is a complete version based on your code idea, but changed so the slider has 300 positions
+# spread across the whole wire, not 20 per edge.
+# The mapping is done by total wire length, so movement is evenly distributed across all edges
+#
+import FreeCAD as App
+import FreeCADGui as Gui
+import Part, sys
+from PySide import QtGui, QtCore
+
+class PathMover(QtGui.QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Move object along sketch path (forward only)")
+
+        sel = Gui.Selection.getSelection()
+        if len(sel) < 2:
+            App.Console.PrintError("Select path sketch first and the moving object second.\n")
+            return
+
+        self.sketch = sel[0]
+        self.wheel = sel[1]
+
+        if not hasattr(self.sketch, "Shape") or not hasattr(self.wheel, "Placement"):
+            App.Console.PrintError("Selection must be a sketch/path and a movable object.\n")
+            return
+
+        wire = self.sketch.Shape.Wires[0]
+        self.vtx = wire.OrderedVertexes
+        self.edges = wire.OrderedEdges    # use OrderedEdges for correct topology
+        self.total_len = wire.Length
+
+        # for edge in self.edges:
+        #     p1 = edge.valueAt(edge.FirstParameter)
+        #     p2 = edge.valueAt(edge.LastParameter)
+        #     print([p1, p2], file=sys.stderr)
+
+        self.slider = QtGui.QSlider(QtCore.Qt.Horizontal)
+        self.slider.setMinimum(0)
+        self.slider.setMaximum(300)
+        self.slider.setValue(0)
+        self.slider.valueChanged.connect(self.on_slider)
+
+        self.label = QtGui.QLabel("0 / 300")
+
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget(self.label)
+        layout.addWidget(self.slider)
+        self.setLayout(layout)
+
+        self.resize(500, 80)
+        self.show()
+
+        self.on_slider(0)
+
+    def point_at_wire_fraction(self, t):
+        t = max(0.0, min(1.0, t))
+        target = t * self.total_len
+        acc = 0.0
+
+        lastp = None
+        for edge in self.edges:
+            flip = False
+            if lastp:
+                d1 = (lastp-edge.valueAt(edge.FirstParameter)).Length
+                d2 = (lastp-edge.valueAt(edge.LastParameter)).Length
+                if (d2 < d1):
+                   flip = True
+                   lastp = edge.valueAt(edge.FirstParameter)
+                else:
+                   lastp = edge.valueAt(edge.LastParameter)
+            else:
+               lastp = edge.valueAt(edge.LastParameter)
+
+            elen = edge.Length
+            if acc + elen >= target:
+                local = 0.0 if elen <= 0 else (target - acc) / elen
+
+                if flip:
+                    # Use edge parameter in the “backward” direction
+                    u = edge.LastParameter + (edge.FirstParameter - edge.LastParameter) * local
+                else:
+                    # Use edge parameter in the “forward” direction
+                    u = edge.FirstParameter + (edge.LastParameter - edge.FirstParameter) * local
+                p = edge.valueAt(u)
+                return App.Vector(p.x, p.y, p.z)
+
+            acc += elen
+
+        # if t == 1, return last point of last edge
+        last = self.edges[-1]
+        p = last.valueAt(last.LastParameter)
+        return App.Vector(p.x, p.y, p.z)
+
+    def on_slider(self, value):
+        self.label.setText(f"{value} / 300")
+
+        p = self.point_at_wire_fraction(value / 300.0)
+        if p is None:
+            return
+
+        self.wheel.Placement.Base = p
+        App.ActiveDocument.recompute()
+        Gui.updateGui()
+
+
+dlg = PathMover()
