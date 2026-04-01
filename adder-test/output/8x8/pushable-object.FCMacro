@@ -65,6 +65,13 @@ class MacroDockWidget(QtGui.QDockWidget):
 
 ## - endif Standalone  / dockable widget boiler plate code
 
+        sel = Gui.Selection.getSelection()
+        if len(sel) < 1:
+            App.Console.PrintError("Select object that shall be pushed.\n")
+            return
+
+        self.pushable = sel[0]
+
         # -------- Radio groups --------
 
         # Axis: x / y / z
@@ -89,10 +96,13 @@ class MacroDockWidget(QtGui.QDockWidget):
 
         # Message label for move events
         self.move_label = QtGui.QLabel("Wait for object to move...")
+        self.debug_label = QtGui.QLabel("Overlap: %g" % 0.0)
 
         # -------- Layout --------
 
         layout = QtGui.QVBoxLayout()
+        layout.addWidget(QtGui.QLabel("Pushable Object:" + self.pushable.Name))
+        layout.addWidget(QtGui.QLabel(""))
         layout.addWidget(QtGui.QLabel("Axis:"))
         layout.addWidget(self.axis_x)
         layout.addWidget(self.axis_y)
@@ -103,6 +113,7 @@ class MacroDockWidget(QtGui.QDockWidget):
         layout.addWidget(self.dir_both)
         layout.addWidget(QtGui.QLabel(""))
         layout.addWidget(self.move_label)
+        layout.addWidget(self.debug_label)
 
         self.central_widget.setLayout(layout)
 ## - else standalone
@@ -124,8 +135,22 @@ class MacroDockWidget(QtGui.QDockWidget):
         # post the event to Qt so it updates the dock safely
         self.move_signal.emit(doc, obj, axis)
 
+
     def on_object_moved(self, doc_name, obj_name, axis):
+	if obj_name == self.pushable.Name:	# ignore move signals from our pushable
+            return
+
         self.move_label.setText(f"Moved: {doc_name}.{obj_name} ({axis})")
+
+        moving = self.pushable.Document.GetObject(obj_name)
+        shape_a = self.pushable.Shape.copy()
+        shape_a.Placement = self.pushable.getGlobalPlacement()
+        shape_b = moving.Shape.copy()
+        shape_b.Placement = moving.getGlobalPlacement()
+        common = shape_a.common(shape_b)
+        self.debug_label = QtGui.QLabel("Overlap: %g" % common.Volume)
+
+
 
     def closeEvent(self, event):
         if self.observer is not None:
