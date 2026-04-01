@@ -1,0 +1,160 @@
+# Install into:
+#  ~/.local/share/FreeCAD/v1-2/Macro/pushable-object.FCMacro
+#
+# (C) 2026-04-01, juergenweigert68@gmail.com, distribute under GPL or ask
+#
+# Perplexity:
+# Here is a complete FreeCAD macro that:
+#  * opens a GUI dialog with two radio groups: x/y/z and positive/negative/both (defaults: x and both),
+#  * installs a DocumentObserver so it notices when any object is moved,
+#  * and updates a label in the GUI with the name of the moved object and which axis changed.
+#
+import FreeCAD as App
+import FreeCADGui as Gui
+from PySide import QtGui, QtCore
+
+# =============== DOCUMENT OBSERVER ==================
+
+class MoveObserver:
+
+    def __init__(self, callback):
+        self.callback = callback
+
+    def slotChangedObject(self, obj, prop):
+        # Only care about Placement changes
+        if prop == "Placement":
+            plm = obj.Placement
+            axis = "unknown"
+            # since placement contains Base (position) and Rotation
+            base = plm.Base
+            dx, dy, dz = base.x, base.y, base.z
+            # if you want to ignore tiny changes, use a small epsilon
+            eps = 1e-6
+            if abs(dx) > eps:
+                axis = "x"
+            elif abs(dy) > eps:
+                axis = "y"
+            elif abs(dz) > eps:
+                axis = "z"
+            else:
+                axis = "position"
+
+            # call hook in GUI (thread‑safe via Qt signal)
+            self.callback(obj.Document.Name, obj.Name, axis)
+
+
+# =============== GUI DIALOG =========================
+
+## - if standalone main window code:
+# class MyDialog(QtGui.QWidget):
+#     def __init__(self):
+#         super().__init__()
+#         self.setWindowTitle("Path Motion Controller")
+## - else dockable widget code:
+class MacroDockWidget(QtGui.QDockWidget):
+    # Use a Qt signal so the observer can talk safely to GUI
+    move_signal = QtCore.Signal(str, str, str)  # doc, obj, axis
+
+    def __init__(self, parent=None):
+        super().__init__("Path Motion Panel", parent)
+        self.setObjectName("PathMotionPanel")  # needed so FreeCAD remembers it
+
+        # Central widget inside the dock
+        self.central_widget = QtGui.QWidget()
+        self.setWidget(self.central_widget)
+
+## - endif Standalone  / dockable widget boiler plate code
+
+        # -------- Radio groups --------
+
+        # Axis: x / y / z
+        self.axis_group = QtGui.QButtonGroup()
+        self.axis_x = QtGui.QRadioButton("x")
+        self.axis_y = QtGui.QRadioButton("y")
+        self.axis_z = QtGui.QRadioButton("z")
+        self.axis_group.addButton(self.axis_x, 0)
+        self.axis_group.addButton(self.axis_y, 1)
+        self.axis_group.addButton(self.axis_z, 2)
+        self.axis_x.setChecked(True)  # default x
+
+        # Direction: positive / negative / both
+        self.dir_group = QtGui.QButtonGroup()
+        self.dir_pos = QtGui.QRadioButton("positive")
+        self.dir_neg = QtGui.QRadioButton("negative")
+        self.dir_both = QtGui.QRadioButton("both")
+        self.dir_group.addButton(self.dir_pos, 0)
+        self.dir_group.addButton(self.dir_neg, 1)
+        self.dir_group.addButton(self.dir_both, 2)
+        self.dir_both.setChecked(True)  # default both
+
+        # Message label for move events
+        self.move_label = QtGui.QLabel("Wait for object to move...")
+
+        # -------- Layout --------
+
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget(QtGui.QLabel("Axis:"))
+        layout.addWidget(self.axis_x)
+        layout.addWidget(self.axis_y)
+        layout.addWidget(self.axis_z)
+        layout.addWidget(QtGui.QLabel("Direction:"))
+        layout.addWidget(self.dir_pos)
+        layout.addWidget(self.dir_neg)
+        layout.addWidget(self.dir_both)
+        layout.addWidget(QtGui.QLabel(""))
+        layout.addWidget(self.move_label)
+
+        self.central_widget.setLayout(layout)
+## - else standalone
+#        self.setLayout(layout)
+
+        self.resize(280, 220)
+#        self.show()
+
+        # -------- Document observer --------
+
+        self.move_signal.connect(self.on_object_moved)
+
+        # -------- Install DocumentObserver --------
+
+        self.observer = MoveObserver(self._notify_gui)
+        App.addDocumentObserver(self.observer)
+
+    def _notify_gui(self, doc, obj, axis):
+        # post the event to Qt so it updates the dock safely
+        self.move_signal.emit(doc, obj, axis)
+
+    def on_object_moved(self, doc_name, obj_name, axis):
+        self.move_label.setText(f"Moved: {doc_name}.{obj_name} ({axis})")
+
+    def closeEvent(self, event):
+        if self.observer is not None:
+            App.removeDocumentObserver(self.observer)
+            self.observer = None
+        super().closeEvent(event)
+
+    def get_axis_dir(self):
+        axis = ["x", "y", "z"][self.axis_group.checkedId()]
+        direction = ["positive", "negative", "both"][self.dir_group.checkedId()]
+        return axis, direction
+
+
+## Create dialog when macro runs
+# dlg = MyDialog()
+
+ 
+# =============== Macro entry point for dockable window ====================
+
+def main():
+    mw = Gui.getMainWindow()
+    existing = mw.findChild(QtGui.QDockWidget, "PathMotionPanel")
+    if not existing:
+        dock = MacroDockWidget(mw)
+        dock.setAllowedAreas(QtCore.Qt.RightDockWidgetArea | QtCore.Qt.LeftDockWidgetArea)
+        mw.addDockWidget(QtCore.Qt.RightDockWidgetArea, dock)
+        dock.show()
+    else:
+        existing.show()
+
+
+main()

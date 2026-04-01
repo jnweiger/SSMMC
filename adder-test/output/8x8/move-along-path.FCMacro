@@ -4,10 +4,10 @@
 # (C) 2026-03-31, juergenweigert68@gmail.com, distribute under GPL or ask
 #
 # Perplexity:
-# Yes. A FreeCAD macro can absolutely show a GUI slider and use it to drive the motion live,
+# A FreeCAD macro can show a GUI slider and use it to drive the motion live,
 # and Qt/PySide slider dialogs are a normal pattern for FreeCAD macros.
 # Below is a complete version based on your code idea, but changed so the slider has 300 positions
-# spread across the whole wire, not 20 per edge.
+# spread across the whole wire.
 # The mapping is done by total wire length, so movement is evenly distributed across all edges
 #
 import FreeCAD as App
@@ -18,7 +18,7 @@ from PySide import QtGui, QtCore
 class PathMover(QtGui.QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Move object along sketch path (forward only)")
+        self.setWindowTitle("Move object along sketch path")
 
         sel = Gui.Selection.getSelection()
         if len(sel) < 2:
@@ -31,6 +31,12 @@ class PathMover(QtGui.QWidget):
         if not hasattr(self.sketch, "Shape") or not hasattr(self.wheel, "Placement"):
             App.Console.PrintError("Selection must be a sketch/path and a movable object.\n")
             return
+
+        # The sketch's Shape is in local coordinates.
+        # To get global coordinates, we need the sketch's global placement.
+        # This gives the full cumulative placement (Body + all parents):
+        self.global_placement = self.sketch.getGlobalPlacement()
+
 
         wire = self.sketch.Shape.Wires[0]
         self.vtx = wire.OrderedVertexes
@@ -89,7 +95,7 @@ class PathMover(QtGui.QWidget):
                 else:
                     # Use edge parameter in the “forward” direction
                     u = edge.FirstParameter + (edge.LastParameter - edge.FirstParameter) * local
-                p = edge.valueAt(u)
+                p = self.global_placement.multVec(edge.valueAt(u))
                 return App.Vector(p.x, p.y, p.z)
 
             acc += elen
