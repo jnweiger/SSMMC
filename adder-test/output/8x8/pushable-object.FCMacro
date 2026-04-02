@@ -102,6 +102,7 @@ class MyDialog(QtGui.QWidget):
         self.axis_combo.addItem("y")
         self.axis_combo.addItem("z")
         self.axis_combo.setCurrentIndex(0)  # default 0 = "x"
+        self.axis_combo.setFixedWidth(80)
 
         # Message label for move events
         self.move_label = QtGui.QLabel("Wait for object to move...")
