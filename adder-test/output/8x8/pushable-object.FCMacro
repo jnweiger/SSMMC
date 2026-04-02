@@ -15,54 +15,66 @@ from PySide import QtGui, QtCore
 
 # =============== DOCUMENT OBSERVER ==================
 
-class MoveObserver:
+## - if standalone
+class MoveObserver(QtCore.QObject):
+    moved = QtCore.Signal(str, str)  # obj, axis
 
-    def __init__(self, callback):
-        self.callback = callback
+    def __init__(self):
+        super().__init__()
+## - else standalone
+# class MoveObserver:
+# 
+#     def __init__(self, callback):
+#         self.callback = callback
+## - endif standalone
 
     def slotChangedObject(self, obj, prop):
         # Only care about Placement changes
         if prop == "Placement":
             plm = obj.Placement
             axis = "unknown"
-            # since placement contains Base (position) and Rotation
-            base = plm.Base
-            dx, dy, dz = base.x, base.y, base.z
-            # if you want to ignore tiny changes, use a small epsilon
-            eps = 1e-6
-            if abs(dx) > eps:
-                axis = "x"
-            elif abs(dy) > eps:
-                axis = "y"
-            elif abs(dz) > eps:
-                axis = "z"
-            else:
-                axis = "position"
+            ## since placement contains Base (position) and Rotation
+            # base = plm.Base     # FIXME: we don't know the old position.
+            # dx, dy, dz = base.x, base.y, base.z
+            ## if you want to ignore tiny changes, use a small epsilon
+            # eps = 1e-6
+            # if abs(dx) > eps:
+            #     axis = "x:%g" % dx
+            # elif abs(dy) > eps:
+            #     axis = "y:%g" % dy
+            # elif abs(dz) > eps:
+            #     axis = "z:%g" % dz
+            # else:
+            #     axis = "position"
 
-            # call hook in GUI (thread‑safe via Qt signal)
-            self.callback(obj.Document.Name, obj.Name, axis)
+## - if standalone
+            self.moved.emit(obj.Name, axis)
+## - else standalone
+#             # call hook in GUI (thread‑safe via Qt signal)
+#             self.callback(obj.Name, axis)
+## - endif standalone
 
 
 # =============== GUI DIALOG =========================
 
 ## - if standalone main window code:
-# class MyDialog(QtGui.QWidget):
-#     def __init__(self):
-#         super().__init__()
-#         self.setWindowTitle("Path Motion Controller")
+class MyDialog(QtGui.QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Path Motion Controller")
 ## - else dockable widget code:
-class MacroDockWidget(QtGui.QDockWidget):
-    # Use a Qt signal so the observer can talk safely to GUI
-    move_signal = QtCore.Signal(str, str, str)  # doc, obj, axis
-
-    def __init__(self, parent=None):
-        super().__init__("Path Motion Panel", parent)
-        self.setObjectName("PathMotionPanel")  # needed so FreeCAD remembers it
-
-        # Central widget inside the dock
-        self.central_widget = QtGui.QWidget()
-        self.setWidget(self.central_widget)
-
+# class MacroDockWidget(QtGui.QDockWidget):
+#     # Use a Qt signal so the observer can talk safely to GUI
+#     move_signal = QtCore.Signal(str, str, str)  # doc, obj, axis
+# 
+#     def __init__(self, parent=None):
+#         super().__init__("Path Motion Panel", parent)
+#         self.setObjectName("PathMotionPanel")  # needed so FreeCAD remembers it
+# 
+#         # Central widget inside the dock
+#         self.central_widget = QtGui.QWidget()
+#         self.setWidget(self.central_widget)
+# 
 ## - endif Standalone  / dockable widget boiler plate code
 
         sel = Gui.Selection.getSelection()
@@ -72,100 +84,136 @@ class MacroDockWidget(QtGui.QDockWidget):
 
         self.pushable = sel[0]
 
+        self.search_step = 0.1  # mm push increments.
+
         # -------- Radio groups --------
 
-        # Axis: x / y / z
-        self.axis_group = QtGui.QButtonGroup()
-        self.axis_x = QtGui.QRadioButton("x")
-        self.axis_y = QtGui.QRadioButton("y")
-        self.axis_z = QtGui.QRadioButton("z")
-        self.axis_group.addButton(self.axis_x, 0)
-        self.axis_group.addButton(self.axis_y, 1)
-        self.axis_group.addButton(self.axis_z, 2)
-        self.axis_x.setChecked(True)  # default x
-
-        # Direction: positive / negative / both
-        self.dir_group = QtGui.QButtonGroup()
-        self.dir_pos = QtGui.QRadioButton("positive")
-        self.dir_neg = QtGui.QRadioButton("negative")
-        self.dir_both = QtGui.QRadioButton("both")
-        self.dir_group.addButton(self.dir_pos, 0)
-        self.dir_group.addButton(self.dir_neg, 1)
-        self.dir_group.addButton(self.dir_both, 2)
-        self.dir_both.setChecked(True)  # default both
+        ## Axis: x / y / z
+        # self.axis_group = QtGui.QButtonGroup()
+        # self.axis_x = QtGui.QRadioButton("x")
+        # self.axis_y = QtGui.QRadioButton("y")
+        # self.axis_z = QtGui.QRadioButton("z")
+        # self.axis_group.addButton(self.axis_x, 0)
+        # self.axis_group.addButton(self.axis_y, 1)
+        # self.axis_group.addButton(self.axis_z, 2)
+        # self.axis_x.setChecked(True)  # default x
+        self.axis_combo = QtGui.QComboBox()
+        self.axis_combo.addItem("x")
+        self.axis_combo.addItem("y")
+        self.axis_combo.addItem("z")
+        self.axis_combo.setCurrentIndex(0)  # default 0 = "x"
 
         # Message label for move events
         self.move_label = QtGui.QLabel("Wait for object to move...")
-        self.debug_label = QtGui.QLabel("Overlap: %g" % 0.0)
+        self.collision_label = QtGui.QLabel("Overlap: -")
 
         # -------- Layout --------
 
         layout = QtGui.QVBoxLayout()
-        layout.addWidget(QtGui.QLabel("Pushable Object:" + self.pushable.Name))
+        layout.addWidget(QtGui.QLabel(f"Pushable: {self.pushable.Label}" + "" if self.pushable.Label == self.pushable.Name else f" ({self.pushable.Name})"))
         layout.addWidget(QtGui.QLabel(""))
         layout.addWidget(QtGui.QLabel("Axis:"))
-        layout.addWidget(self.axis_x)
-        layout.addWidget(self.axis_y)
-        layout.addWidget(self.axis_z)
-        layout.addWidget(QtGui.QLabel("Direction:"))
-        layout.addWidget(self.dir_pos)
-        layout.addWidget(self.dir_neg)
-        layout.addWidget(self.dir_both)
+        layout.addWidget(self.axis_combo)
         layout.addWidget(QtGui.QLabel(""))
         layout.addWidget(self.move_label)
-        layout.addWidget(self.debug_label)
-
-        self.central_widget.setLayout(layout)
+        layout.addWidget(self.collision_label)
+## - if standalone
+        self.setLayout(layout)
 ## - else standalone
-#        self.setLayout(layout)
+#         self.central_widget.setLayout(layout)
+## - endif standalone
 
         self.resize(280, 220)
-#        self.show()
+        self.show()
 
         # -------- Document observer --------
 
-        self.move_signal.connect(self.on_object_moved)
-
-        # -------- Install DocumentObserver --------
-
-        self.observer = MoveObserver(self._notify_gui)
+## - if standalone
+        self.observer = MoveObserver()
         App.addDocumentObserver(self.observer)
+        self.observer.moved.connect(self.on_object_moved)
+## - else standalone
+#        self.move_signal.connect(self.on_object_moved)
+#        self.observer = MoveObserver(self._notify_gui)
+#        App.addDocumentObserver(self.observer)
+## - endif standalone
 
     def _notify_gui(self, doc, obj, axis):
         # post the event to Qt so it updates the dock safely
         self.move_signal.emit(doc, obj, axis)
 
+    def find_overlap_d(self, a, b, axis="x", step=0.1, eps=0.0001):
+        if axis == "x":
+            v_step = App.Vector(step, 0, 0)
+        elif axis == "y":
+            v_step = App.Vector(0, step, 0)
+        else:
+            v_step = App.Vector(0, 0, step)
 
-    def on_object_moved(self, doc_name, obj_name, axis):
-	if obj_name == self.pushable.Name:	# ignore move signals from our pushable
+        counter = 0
+        common = a.common(b)
+        old_ov = common.Volume
+        if old_ov > eps:     # check the direction
+            orig_base = a.Placement.Base
+            a.Placement.Base = a.Placement.Base.add(v_step)
+            common = a.common(b)
+            if common.Volume > old_ov:  # wrong direction. Undo that test movement.
+                v_step = -v_step
+                a.Placement.Base = orig_base
+            else:
+                counter = 1 # we did a step in the right direction.
+                old_ov = common.Volume
+        else:
+            return None     # nothing to do.
+
+        while old_ov > eps:
+            counter = counter + 1
+            a.Placement.Base = a.Placement.Base.add(v_step)
+            common = a.common(b)
+            if common.Volume > old_ov:
+                App.Console.PrintError("find_overlap_d() abort. Overlap unexpectedly got bigger again???")
+                return v_step * (counter-1)
+            if counter > 10000:
+                App.Console.PrintError("find_overlap_d() abort. counter reached 10000.")
+                return v_step * counter
+            old_ov = common.Volume
+
+        # Good, we are free. Maybe try bisecting to refine?
+        return v_step * counter
+
+
+    def on_object_moved(self, obj_name, axis):
+        if obj_name == self.pushable.Name:      # ignore move signals from our pushable
+            App.Console.PrintMessage("on_object_moved: skipping self\n")
             return
 
-        self.move_label.setText(f"Moved: {doc_name}.{obj_name} ({axis})")
+        mover = self.pushable.Document.getObject(obj_name)
+        self.move_label.setText(f"Moved: {mover.Label}" + "" if obj_name == mover.Label else f" ({obj_name})")
 
-        moving = self.pushable.Document.GetObject(obj_name)
         shape_a = self.pushable.Shape.copy()
         shape_a.Placement = self.pushable.getGlobalPlacement()
-        shape_b = moving.Shape.copy()
-        shape_b.Placement = moving.getGlobalPlacement()
-        common = shape_a.common(shape_b)
-        self.debug_label = QtGui.QLabel("Overlap: %g" % common.Volume)
+        shape_b = mover.Shape.copy()
+        shape_b.Placement = mover.getGlobalPlacement()
+        dist = self.find_overlap_d(shape_a, shape_b, self.get_axis(), self.search_step)
+        self.collision_label.setText(f"Overlap: {dist}")
 
+        if dist:
+            # push our pushable.
+            self.pushable.Placement.Base = self.pushable.Placement.Base.add(dist)
+            self.pushable.Document.recompute()
+
+
+    def get_axis(self):
+        axis = ["x", "y", "z"][self.axis_group.checkedId()]
+        return axis
 
 
     def closeEvent(self, event):
-        if self.observer is not None:
+        if self.observer:
             App.removeDocumentObserver(self.observer)
             self.observer = None
         super().closeEvent(event)
 
-    def get_axis_dir(self):
-        axis = ["x", "y", "z"][self.axis_group.checkedId()]
-        direction = ["positive", "negative", "both"][self.dir_group.checkedId()]
-        return axis, direction
-
-
-## Create dialog when macro runs
-# dlg = MyDialog()
 
  
 # =============== Macro entry point for dockable window ====================
@@ -182,4 +230,9 @@ def main():
         existing.show()
 
 
-main()
+## - if standalone toplevel window
+# Create dialog when macro runs
+dlg = MyDialog()
+## - else standalone
+# main()
+## - endif standalone
