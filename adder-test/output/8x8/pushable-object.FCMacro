@@ -110,7 +110,7 @@ class MyDialog(QtGui.QWidget):
         # -------- Layout --------
 
         layout = QtGui.QVBoxLayout()
-        layout.addWidget(QtGui.QLabel(f"Pushable: {self.pushable.Label}" + "" if self.pushable.Label == self.pushable.Name else f" ({self.pushable.Name})"))
+        layout.addWidget(QtGui.QLabel(f"Pushable: {self.pushable.Label}" + ("" if self.pushable.Label == self.pushable.Name else f" ({self.pushable.Name})")))
         layout.addWidget(QtGui.QLabel(""))
         layout.addWidget(QtGui.QLabel("Axis:"))
         layout.addWidget(self.axis_combo)
@@ -123,7 +123,7 @@ class MyDialog(QtGui.QWidget):
 #         self.central_widget.setLayout(layout)
 ## - endif standalone
 
-        self.resize(280, 220)
+        self.resize(200, 220)
         self.show()
 
         # -------- Document observer --------
@@ -188,7 +188,7 @@ class MyDialog(QtGui.QWidget):
             return
 
         mover = self.pushable.Document.getObject(obj_name)
-        self.move_label.setText(f"Moved: {mover.Label}" + "" if obj_name == mover.Label else f" ({obj_name})")
+        self.move_label.setText(f"Moved: {mover.Label}" + ("" if obj_name == mover.Label else f" ({obj_name})"))
 
         shape_a = self.pushable.Shape.copy()
         shape_a.Placement = self.pushable.getGlobalPlacement()
@@ -204,7 +204,8 @@ class MyDialog(QtGui.QWidget):
 
 
     def get_axis(self):
-        axis = ["x", "y", "z"][self.axis_group.checkedId()]
+        # axis = ["x", "y", "z"][self.axis_group.checkedId()]
+        axis = ["x", "y", "z"][self.axis_combo.currentIndex()]
         return axis
 
 
