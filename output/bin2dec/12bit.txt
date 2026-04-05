@@ -9,6 +9,9 @@ oder freigeben können.
 genügt das?
 
 
+Das Null Kärtchen kann hinten immer gezeigt bleiben.
+Alle Kärtchen kleiner der zu zeigenden Karte können entweder auch gezeigt oder nicht gezeigt werden.
+
 
 	32  16  8    4   2   1
 	1 0 1 0 1 0  1 0 1 0 1 0
