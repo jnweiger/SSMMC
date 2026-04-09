@@ -1,0 +1,19 @@
+			jw, Tue Mar 17 15:44:20 CET 2026
+
+Kritik am schieber_8x8.txt:
+Schieber mit Zahnstangen braucht sehr viel Platz.
+Das Ritzel verdoppelt den Weg des Input Schiebers am output.
+Damit kann der Input-Schieber auch keinen einfachen Rückholhaken für den Output haben. 
+ (dafür müssten wir den ganzen ritzel und Zahnstangen mechanismus verdoppeln - nicht schön)
+
+
+Platzsparende Idee einer Kette, die im Ruhezustand Zickzack liegt.
+Seitlich werden nacheinander(!) drei Schieber in den Kanal der Kette gepresst, die 
+(weil unterschieldich breit) je ein, zwei, oder vier Kettenglieder (teilweise(!)) strecken. Es müsste möglich sein, die Verhältnisse so anzupassen, 
+dass der Input Keilschlitten, der die Schieber einpresst, etwas mehr Weg macht, 
+als die Kettenstreckung. Dann klappt es auch mit dem Rückholhaken.
+
+chain links 12x5 mm: 
+min	 45° ->  9.2 mm
+max	120° -> 23.2 mm
+
