@@ -1,0 +1,5 @@
+Ein Kreis mit Durchmesser 117 mm dreht sich genau einmal um sich selbst, während sein Mittelpunkt sich auf einer Kreisbahn von 33 mm Durchmesser bewegt. 
+Wir nehmen den Punkt auf der Kreislinie ganz rechts, und starten, wenn mit dem Kreismittelpunkt ebenfalls ganz rechts auf seiner kleinen Bahn. 
+
+Bei gleichem Drehsinn beschreibt der Punkt eine Kreisbahn von 150 mm. 
+Wie sieht die Bahn aus, bei entgegengesetztem Drehsinn?

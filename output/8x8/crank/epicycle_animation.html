@@ -1,0 +1,157 @@
+
+<style>
+canvas { display: block; margin: 0 auto; }
+.controls { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: center; margin: 12px 0 8px; font-size: 14px; color: var(--color-text-secondary); }
+.controls label { display: flex; align-items: center; gap: 8px; }
+.btn-row { display: flex; gap: 8px; justify-content: center; margin-bottom: 8px; }
+</style>
+
+<canvas id="c" width="560" height="320"></canvas>
+
+<div class="controls">
+  <label>Geschwindigkeit <input type="range" min="1" max="10" value="4" id="spd" step="1"> <span id="spdOut">4</span></label>
+  <label><input type="checkbox" id="showCircle" checked> Kreis zeigen</label>
+</div>
+<div class="btn-row">
+  <button id="btnBoth" style="border: 2px solid var(--color-border-info); color: var(--color-text-info);">Beide Bahnen</button>
+  <button id="btnSame">Gleicher Drehsinn</button>
+  <button id="btnOpp">Entgegengesetzt</button>
+  <button id="btnReset">Neu</button>
+</div>
+
+<script>
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+const W = cv.width, H = cv.height;
+const cx = W/2, cy = H/2;
+
+const R_orbit = 16.5;
+const R_disk  = 58.5;
+const scale   = 3.2;
+
+let mode = 'both';
+let trailSame = [], trailOpp = [];
+let t = 0;
+let running = true;
+let showCircle = true;
+let speed = 4;
+
+document.getElementById('spd').addEventListener('input', e => {
+  speed = +e.target.value;
+  document.getElementById('spdOut').textContent = speed;
+});
+document.getElementById('showCircle').addEventListener('change', e => { showCircle = e.target.checked; });
+document.getElementById('btnBoth').addEventListener('click', () => { mode='both'; reset(); });
+document.getElementById('btnSame').addEventListener('click', () => { mode='same'; reset(); });
+document.getElementById('btnOpp').addEventListener('click', () => { mode='opp'; reset(); });
+document.getElementById('btnReset').addEventListener('click', reset);
+
+function reset() { trailSame=[]; trailOpp=[]; t=0; }
+
+function pointPos(t, sign) {
+  const ox = R_orbit * Math.cos(t);
+  const oy = R_orbit * Math.sin(t);
+  const px = ox + R_disk * Math.cos(sign * t);
+  const py = oy + R_disk * Math.sin(sign * t);
+  return { ox, oy, px, py };
+}
+
+function toScreen(x, y) {
+  return [cx + x*scale, cy - y*scale];
+}
+
+function drawArrow(x1,y1,x2,y2,color){
+  ctx.strokeStyle = color; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function drawCircleAt(sx,sy,r,color,alpha=0.18){
+  ctx.beginPath(); ctx.arc(sx,sy,r*scale,0,2*Math.PI);
+  ctx.strokeStyle=color; ctx.globalAlpha=alpha; ctx.lineWidth=1; ctx.stroke();
+  ctx.globalAlpha=1;
+}
+
+function drawTrail(trail, color) {
+  if(trail.length < 2) return;
+  ctx.beginPath();
+  ctx.moveTo(...toScreen(trail[0][0], trail[0][1]));
+  for(let i=1;i<trail.length;i++) ctx.lineTo(...toScreen(trail[i][0],trail[i][1]));
+  ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
+}
+
+function drawMachine(pos, sign, color) {
+  const [osx,osy] = toScreen(pos.ox, pos.oy);
+  const [psx,psy] = toScreen(pos.px, pos.py);
+  const [zx,zy]   = toScreen(0,0);
+
+  if(showCircle) {
+    drawCircleAt(zx,zy, R_orbit, color, 0.12);
+    drawCircleAt(osx,osy, R_disk, color, 0.18);
+  }
+
+  drawArrow(zx,zy,osx,osy, color);
+  drawArrow(osx,osy,psx,psy, color);
+
+  ctx.beginPath(); ctx.arc(osx,osy,4,0,2*Math.PI);
+  ctx.fillStyle=color; ctx.globalAlpha=0.6; ctx.fill(); ctx.globalAlpha=1;
+
+  ctx.beginPath(); ctx.arc(psx,psy,5,0,2*Math.PI);
+  ctx.fillStyle=color; ctx.fill();
+}
+
+function frame() {
+  ctx.clearRect(0,0,W,H);
+
+  const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+  const axCol = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+  ctx.strokeStyle = axCol; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(0,cy); ctx.lineTo(W,cy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx,0); ctx.lineTo(cx,H); ctx.stroke();
+  ctx.setLineDash([]);
+
+  const colorSame = '#185FA5';
+  const colorOpp  = '#D85A30';
+
+  if(mode==='both'||mode==='same') {
+    const pos = pointPos(t, 1);
+    trailSame.push([pos.px, pos.py]);
+    drawTrail(trailSame, colorSame);
+    if(mode==='same') drawMachine(pos, 1, colorSame);
+  }
+  if(mode==='both'||mode==='opp') {
+    const pos = pointPos(t, -1);
+    trailOpp.push([pos.px, pos.py]);
+    drawTrail(trailOpp, colorOpp);
+    if(mode==='opp') drawMachine(pos, -1, colorOpp);
+  }
+  if(mode==='both') {
+    const posSame = pointPos(t, 1);
+    const posOpp  = pointPos(t, -1);
+    drawMachine(posSame, 1, colorSame);
+    drawMachine(posOpp, -1, colorOpp);
+  }
+
+  const dt = 0.01 * speed;
+  t += dt;
+
+  const fullRev = 2 * Math.PI;
+  if(trailSame.length > fullRev/dt*1.02) trailSame.shift();
+  if(trailOpp.length  > fullRev/dt*1.02) trailOpp.shift();
+
+  const [lx,ly] = toScreen(-W/(2*scale)+2, -H/(2*scale)+10);
+  ctx.font = '12px var(--font-sans)'; ctx.textBaseline='top';
+  if(mode==='both'||mode==='same'){
+    ctx.fillStyle=colorSame; ctx.fillRect(12,12,12,4);
+    ctx.fillStyle=isDark?'#fff':'#333'; ctx.fillText('Gleicher Drehsinn → Kreis ⌀150 mm', 30, 10);
+  }
+  if(mode==='both'||mode==='opp'){
+    const row = (mode==='both')?32:10;
+    ctx.fillStyle=colorOpp; ctx.fillRect(12,row+2,12,4);
+    ctx.fillStyle=isDark?'#fff':'#333'; ctx.fillText('Entgegengesetzt → Ellipse 150×84 mm', 30, row);
+  }
+
+  requestAnimationFrame(frame);
+}
+frame();
+</script>
